@@ -1,6 +1,7 @@
 const { isValidObjectId } = require('mongoose')
 const Task = require('../models/task')
-const asyncWrapper = require('../middlewares/async')
+const asyncWrapper = require('../middlewares/async');
+const { createCustomError } = require('../errors/custom-error');
 
 const getAllTasks = asyncWrapper(async (req, res) => {
   const tasks = await Task.find({});
@@ -17,24 +18,24 @@ const createTask = asyncWrapper(async (req, res) => {
   return res.status(201).json({ task });
 });
 
-const getTask = asyncWrapper(async (req, res) => {
+const getTask = asyncWrapper(async (req, res, next) => {
 	const { id } = req.params;
 
 	if (!isValidObjectId(id)) {
-		return res.status(400).json({ msg: 'Invalid ID' });
+    return next(createCustomError('Invalid task id', 400));
 	}
   const task = await Task.findById(id);
   if (!task) {
-    return res.status(404).json({ msg: 'Task not found' });
+    return next(createCustomError('Task not found', 404));
   }
   return res.json({ task });
 });
 
-const updateTask = asyncWrapper(async (req, res) => {
+const updateTask = asyncWrapper(async (req, res, next) => {
 	const { id } = req.params;
 
 	if (!isValidObjectId(id)) {
-		return res.status(400).json({ msg: 'Invalid ID' });
+		 return next(createCustomError('Invalid task id', 400));
 	}
 	const task = await Task.findByIdAndUpdate(
 		id,
@@ -45,21 +46,21 @@ const updateTask = asyncWrapper(async (req, res) => {
 	);
 
 	if (!task) {
-		return res.status(404).json({ msg: 'Task not found' });
+		return next(createCustomError('Task not found', 404));
 	}
 	return res.json({ task });
 });
 
-const deleteTask = asyncWrapper(async (req, res) => {
+const deleteTask = asyncWrapper(async (req, res, next) => {
 	const { id } = req.params;
 
 	if (!isValidObjectId(id)) {
-		return res.status(400).json({ msg: 'Invalid ID' });
+		 return next(createCustomError('Invalid task id', 400));
 	}
 
 	const task = await Task.findByIdAndDelete(id);
 	if (!task) {
-		return res.status(404).json({ msg: 'Task not found' });
+		return next(createCustomError('Task not found', 404));
 	}
 	return res.json({ msg: 'Task deleted' });
 });
