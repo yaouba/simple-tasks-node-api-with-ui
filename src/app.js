@@ -10,12 +10,10 @@ const PORT = process.env.PORT || 4000
 
 app.use(express.json())
 
+app.use(express.static('./public'))
+
 app.use('/api/v1/tasks', taskRoutes)
 
-
-app.get('/', (req, res) => {
-  res.json({msg: 'Hello world!!'})
-})
 
 const start = async () => {
   try {
